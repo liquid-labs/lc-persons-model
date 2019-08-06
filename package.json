@@ -4,6 +4,13 @@
   "description": "A standard persons model in Go and JS for Liquid Code + compatible projects.",
   "main": "./dist/index.js",
   "module": "./dist/index.es.js",
+  "files": [
+    "README.md",
+    "LICENSE.txt",
+    "dist/",
+    "go/",
+    "data/"
+  ],
   "scripts": {
     "prebuild": "rm -rf ./dist/* && mkdir -p ./dist",
     "build": "catalyst-scripts build",
