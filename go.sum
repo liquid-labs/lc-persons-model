@@ -1,0 +1,15 @@
+github.com/Liquid-Labs/lc-entities-model v1.0.0-alpha.0 h1:GAke6JzjSdsisRDkqNUv8IluxuiMW2SGiWheayniC0I=
+github.com/Liquid-Labs/lc-entities-model v1.0.0-alpha.0/go.mod h1:HfTC4500jeyysnWhQC6LmNXb5Trc6kt5345J0t7H9ls=
+github.com/Liquid-Labs/lc-locations-model v1.0.0-alpha.1 h1:JpYTC1vWi3CfzlbWNOCALLHWZezGRuD1cFuwHm2YeWc=
+github.com/Liquid-Labs/lc-locations-model v1.0.0-alpha.1/go.mod h1:w+dE+0I4my9UmPKteq9DtUzpk6lv364hBPLH5VMAqIQ=
+github.com/Liquid-Labs/lc-users-model v1.0.0-alpha.0 h1:nyVbRyybJ6JFopr0OL6hxr1Z2d3FxqZgJ0CCUcws73o=
+github.com/Liquid-Labs/lc-users-model v1.0.0-alpha.0/go.mod h1:aRZhAn4NGnQbkrA1NrL6eEcyr8by7DO/JonQDdSlyHI=
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
+github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/objx v0.2.0/go.mod h1:qt09Ya8vawLte6SNmTgCsAVtYtaKzEcn8ATUoHMkEqE=
+github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
+github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
