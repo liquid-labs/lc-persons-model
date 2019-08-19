@@ -1,17 +1,18 @@
 CREATE TABLE persons (
-  id BIGINT,
-  given_name VARCHAR(128),
-  family_name VARCHAR(128),
+  id           UUID,
+  given_name   VARCHAR(128),
+  family_name  VARCHAR(128),
   -- we allow extra space for the pre-formatted number
-  phone VARCHAR(14),
-  email VARCHAR(255) NOT NULL,
+  phone        VARCHAR(14),
+  email        VARCHAR(255) NOT NULL,
   backup_email VARCHAR(255),
   backup_phone VARCHAR(14),
+  avatar_url   VARCHAR,
+
   CONSTRAINT persons_key PRIMARY KEY ( id ),
   CONSTRAINT persons_ref_users FOREIGN KEY ( id ) REFERENCES users ( id )
 );
 
--- Postgres
 CREATE OR REPLACE FUNCTION trigger_persons_phone_format()
   RETURNS TRIGGER AS '
 BEGIN
@@ -25,12 +26,7 @@ CREATE TRIGGER persons_phone_format
   FOR EACH ROW
   EXECUTE PROCEDURE trigger_persons_phone_format();
 
--- MySQL
--- DELIMITER //
--- CREATE TRIGGER persons_phone_format
---  BEFORE INSERT ON persons FOR EACH ROW
---    BEGIN
---       SET new.phone=(SELECT NUMERIC_ONLY(new.phone));
---       SET new.phone_backup=(SELECT NUMERIC_ONLY(new.phone_backup));
---     END;//
--- DELIMITER ;
+CREATE VIEW persons_join_users AS
+  SELECT u.*,
+      p.given_name, p.family_name, p.phone, p.email, p.backup_email, p.backup_phone, p.avatar_url
+    FROM persons p JOIN users_join_entity u ON p.id=u.id;
