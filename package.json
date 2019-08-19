@@ -42,6 +42,7 @@
   },
   "devDependencies": {
     "@liquid-labs/catalyst-scripts": "file:.yalc/@liquid-labs/catalyst-scripts",
+    "@liquid-labs/lc-entities-model": "file:.yalc/@liquid-labs/lc-entities-model",
     "@liquid-labs/lc-rdb-service": "^1.0.0-alpha.0",
     "@liquid-labs/liquid-dev-cloudsql": "^1.0.0-prototype.0"
   },

@@ -28,7 +28,7 @@ type PersonIntegrationSuite struct {
   Ctx    context.Context
   AuthID string
 }
-func (s *PersonIntegrationSuite) SetupSuite() {
+func (s *PersonIntegrationSuite) SetupTest() {
   s.AuthID = strkit.RandString(strkit.LettersAndNumbers, 12)
   ctx := context.Background()
   authenticator := &auth.Authenticator{}
@@ -60,4 +60,43 @@ func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   assert.Equal(s.T(), s.AuthID, p.GetAuthID())
   assert.Equal(s.T(), `Robert`, p.GetGivenName())
   assert.Equal(s.T(), 0, len(p.GetAddresses()))
+}
+
+func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
+  as := make(Addresses, 0)
+  as = append(as,
+    &Address{
+      Location: *NewLocation(`100 Main Str`, ``, `Pflugerville`, `TX`, `78745`),
+      Idx: 1,
+      Label: `Home`,
+    },
+    &Address{
+      Location: *NewLocation(`221 Baker Str`, `#B`, `London`, `AZ`, `654321`),
+      Idx: 2,
+      Label: `Vacation`,
+    })
+  p := persons.NewPerson(
+    NewUser(`users`, `Address Woman`, `a lady`, s.AuthID, `555-44-5555`, `SSN`, true),
+    `Address`,
+    `Woman`,
+    `blah@bar.com`,
+    `555-333-5555`,
+    `flop@bar.com`,
+    `555-222-5555`,
+    `https://avatars.com/address`,
+    as)
+
+  require.NoError(s.T(), p.CreateSelf(rdb.ConnectWithContext(s.Ctx)))
+  assert.Equal(s.T(), `Address Woman`, p.GetName())
+  assert.Equal(s.T(), s.AuthID, p.GetAuthID())
+  assert.Equal(s.T(), `Address`, p.GetGivenName())
+  assert.Equal(s.T(), 2, len(p.GetAddresses()))
+  a1 := p.GetAddresses()[0]
+  assert.Equal(s.T(), `100 Main Str`, a1.GetAddress1())
+  assert.Equal(s.T(), ``, a1.GetAddress2())
+  assert.Equal(s.T(), `Pflugerville`, a1.GetCity())
+  assert.Equal(s.T(), `TX`, a1.GetState())
+  assert.Equal(s.T(), `78745`, a1.GetZip())
+  a2 := p.GetAddresses()[1]
+  assert.Equal(s.T(), `#B`, a2.GetAddress2())
 }

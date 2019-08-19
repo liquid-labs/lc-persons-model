@@ -66,18 +66,33 @@ func (p *Person) CreateRaw(db orm.DB) Terror {
 
 func (p *Person) createAddresses(db orm.DB) Terror {
   if 0 < len(p.GetAddresses()) {
+    locations := make([]*Location, 0)
+    for _, address := range p.GetAddresses() {
+      location := &Location{
+        Address1 : address.GetAddress1(),
+        Address2 : address.GetAddress2(),
+        City     : address.GetCity(),
+        State    : address.GetState(),
+        Zip      : address.GetZip(),
+      }
+      locations = append(locations, location)
+    }
+    if _, err := db.Model(&locations).Insert(); err != nil {
+      return ServerError(`There was a problem inserting the location records.`, err)
+    }
+
     newAddresses := make([]*EntityAddress, 0)
     for i, address := range p.GetAddresses() {
       addressLink := &EntityAddress{
         EntityID   : p.GetID(),
-        LocationID : address.GetLocationID(),
-        Idx        : i,
+        LocationID : locations[i].GetID(),
+        Idx        : i+1, // must start at 1
         Label      : address.GetLabel(),
       }
       newAddresses = append(newAddresses, addressLink)
     }
     if _, err := db.Model(&newAddresses).Insert(); err != nil {
-      return ServerError(`There was a problem insert address records.`, err)
+      return ServerError(`There was a problem inserting the address records.`, err)
     }
   }
 
@@ -108,6 +123,9 @@ func (p *Person) UpdateRaw(db orm.DB) Terror {
   } else {
     if _, err := db.Exec(`DELETE FROM entity_addresses WHERE entity_id=?`, p.GetID()); err != nil {
       return ServerError(`Problem updating person addresses.`, err)
+    }
+    if _, err := db.Exec(`DELETE FROM l.* FROM locations l LEFT JOIN entity_addresses ea l.location_id=ea.id WHERE ea.id IS NULL`); err != nil {
+      // TODO: LOG WARNING; this is not a show stopper, but could cause problems over time
     }
     return p.createAddresses(db)
   }
