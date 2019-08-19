@@ -46,7 +46,7 @@
     "@liquid-labs/liquid-dev-cloudsql": "^1.0.0-prototype.0"
   },
   "dependencies": {
-    "@liquid-labs/lc-locations-model": "^1.0.0-alpha.0",
-    "@liquid-labs/lc-users-model": "^1.0.0-alpha.0"
+    "@liquid-labs/lc-locations-model": "file:.yalc/@liquid-labs/lc-locations-model",
+    "@liquid-labs/lc-users-model": "file:.yalc/@liquid-labs/lc-users-model"
   }
 }

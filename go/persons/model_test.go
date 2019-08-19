@@ -9,7 +9,7 @@ import (
   "testing"
   "time"
 
-  "github.com/Liquid-Labs/lc-entities-model/go/entities"
+  . "github.com/Liquid-Labs/lc-entities-model/go/entities"
   "github.com/Liquid-Labs/lc-locations-model/go/locations"
   "github.com/Liquid-Labs/lc-users-model/go/users"
   "github.com/stretchr/testify/assert"
@@ -19,91 +19,44 @@ import (
   . "github.com/Liquid-Labs/lc-persons-model/go/persons"
 )
 
-var trivialPersonSummary = &PersonSummary{
-  users.User{
-    entities.Entity{
-      entities.InternalID(1),
-      entities.PublicID(`a`),
-      `name`,
-      `name is a user`,
-      entities.InternalID(1),
-      entities.PublicID(`a`),
-      false,
-      time.Now(),
-      time.Now(),
-      time.Time{},
-    },
-    `xzc098`, // AuthID
-    `555-55-5555`, // LegalID
-    `SSN`, // LegalIDType
-    true,
-  },
-  `GivenName`,
-  `FamilyName`,
-  `foo@test.com`,
-  `555-555-9999`,
-  `backup@test.org`,
-  `555-555-9998`,
-  `http://foo.com/avatar`,
-}
+var trivialPerson *Person
 
-func TestPersonSummaryClone(t *testing.T) {
-  clone := trivialPersonSummary.Clone()
-  assert.Equal(t, trivialPersonSummary, clone, `Original does not match clone.`)
-  clone.ID = entities.InternalID(3)
-  clone.PubID = entities.PublicID(`b`)
-  clone.CreatedAt = clone.CreatedAt.Add(10)
-  clone.LastUpdated = clone.LastUpdated.Add(10)
-  clone.DeletedAt = time.Now()
-  clone.Active = false
-  clone.GivenName = `different name`
-  clone.FamilyName = `new family`
-  clone.Email = `blah@test.com`
-  clone.Phone = `555-555-9997`
-  clone.BackupEmail = `blah@test.org`
-  clone.BackupPhone = `555-555-9996`
-  clone.AvatarURL =`http://bar.com/image`
+func init() {
+  trivialPerson = NewPerson(
+    users.NewUser(`users`, `name`, `name is a user`, `xzc098`, `555-55-555`, `SSN`, true),
+    `GivenName`,
+    `FamilyName`,
+    `foo@test.com`,
+    `555-555-9999`,
+    `backup@test.org`,
+    `555-555-9998`,
+    `http://foo.com/avatar`,
+    locations.Addresses{
+      &locations.Address{
+        locations.Location{
+          1,
+          `a`,
+          `b`,
+          `c`,
+          `d`,
+          `e`,
+          sql.NullFloat64{2.0, true},
+          sql.NullFloat64{3.0, true},
+          []string{`f`, `g`},
+        },
+        1,
+        `label a`,
+      }})
 
-  oReflection := reflect.ValueOf(trivialPersonSummary).Elem()
-  cReflection := reflect.ValueOf(clone).Elem()
-  for i := 0; i < oReflection.NumField(); i++ {
-    assert.NotEqualf(
-      t,
-      oReflection.Field(i).Interface(),
-      cReflection.Field(i).Interface(),
-      `Fields '%s' unexpectedly match.`,
-      oReflection.Type().Field(i),
-    )
-  }
-}
-
-var trivialPerson = &Person{
-  *trivialPersonSummary,
-  locations.Addresses{
-    &locations.Address{
-      locations.Location{
-        entities.InternalID(1),
-        `a`,
-        `b`,
-        `c`,
-        `d`,
-        `e`,
-        sql.NullFloat64{2.0, true},
-        sql.NullFloat64{3.0, true},
-        []string{`f`, `g`},
-      },
-      1,
-      `label a`,
-    },
-  },
-  []string{`h`, `i`},
+  trivialPerson.ID = `abc`
+  trivialPerson.OwnerID = `abc`
 }
 
 func TestPersonClone(t *testing.T) {
   clone := trivialPerson.Clone()
   assert.Equal(t, trivialPerson, clone, `Original does not match clone.`)
-  clone.ID = entities.InternalID(3)
-  clone.PubID = entities.PublicID(`b`)
+  clone.ID = EID(`xyz`)
+  clone.OwnerID = EID(`xyz`)
   clone.CreatedAt = clone.CreatedAt.Add(10)
   clone.LastUpdated = clone.LastUpdated.Add(10)
   clone.DeletedAt = time.Now()
@@ -118,7 +71,7 @@ func TestPersonClone(t *testing.T) {
   clone.Addresses = locations.Addresses{
     &locations.Address{
       locations.Location{
-        entities.InternalID(2),
+        2,
         `z`,
         `y`,
         `x`,
@@ -150,13 +103,16 @@ func TestPersonClone(t *testing.T) {
   oReflection := reflect.ValueOf(trivialPerson).Elem()
   cReflection := reflect.ValueOf(clone).Elem()
   for i := 0; i < oReflection.NumField(); i++ {
-    assert.NotEqualf(
-      t,
-      oReflection.Field(i).Interface(),
-      cReflection.Field(i).Interface(),
-      `Fields '%s' unexpectedly match.`,
-      oReflection.Type().Field(i),
-    )
+    name := oReflection.Type().FieldByIndex([]int{i}).Name
+    if name[:1] == strings.ToUpper(name[:1]) {
+      assert.NotEqualf(
+        t,
+        oReflection.Field(i).Interface(),
+        cReflection.Field(i).Interface(),
+        `Fields '%s' unexpectedly match.`,
+        oReflection.Type().Field(i),
+      )
+    }
   }
 }
 
@@ -189,10 +145,10 @@ func TestPersonsDecode(t *testing.T) {
 }
 
 func TestPersonFormatter(t *testing.T) {
-  testP := &Person{PersonSummary: PersonSummary{
+  testP := &Person{
     Phone: `5555555555`,
     BackupPhone: `1234567890`,
-  }}
+  }
   testP.FormatOut()
   assert.Equal(t, `555-555-5555`, testP.Phone)
   assert.Equal(t, `123-456-7890`, testP.BackupPhone)
