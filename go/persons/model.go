@@ -1,6 +1,7 @@
 package persons
 
 import (
+  "log"
   "regexp"
 
   . "github.com/Liquid-Labs/lc-entities-model/go/entities"
@@ -23,7 +24,7 @@ type Person struct {
   BackupEmail string    `json:"backupEmail"`
   BackupPhone string    `json:"backupPhone"`
   AvatarURL   string    `json:"avatarUrl"`
-  Addresses   Addresses `json:"addresses" pg:"many2many:entity_addresses,joinFK:entity_id"`
+  Addresses   Addresses `json:"addresses" pg:"many2many:address_links,fk:entity_id,joinFK:"`
   ChangeDesc  []string  `json:"changeDesc,omitempty" sql:"-"`
 }
 
@@ -48,13 +49,14 @@ func NewPerson(
     backupPhone,
     avatarURL,
     addresses,
-    make([]string, 0),
+    ([]string)(nil),
   }
 }
 
-func (p *Person) FormatOut() {
+func (p *Person) FormatOut() *Person {
   p.Phone = phoneOutFormatter.ReplaceAllString(p.Phone, `$1-$2-$3`)
   p.BackupPhone = phoneOutFormatter.ReplaceAllString(p.BackupPhone, `$1-$2-$3`)
+  return p
 }
 
 func (p *Person) IsConcrete() bool { return true }
@@ -84,11 +86,17 @@ func (p *Person) SetBackupPhone(val string) { p.BackupPhone = val }
 func (p *Person) GetAvatarURL() string { return p.AvatarURL }
 func (p *Person) SetAvatarURL(val string) { p.AvatarURL = val }
 
-func (p *Person) GetAddresses() Addresses { return p.Addresses }
+func (p *Person) GetAddresses() *Addresses { return &p.Addresses }
 
 func (p *Person) Clone() *Person {
-  newChangeDesc := make([]string, len(p.ChangeDesc))
-  copy(newChangeDesc, p.ChangeDesc)
+  newChangeDesc := ([]string)(nil)
+  if p.ChangeDesc != nil {
+    log.Printf("\n\nwhat...\n\n")
+    // TODO: should be []*string
+    newChangeDesc = make([]string, len(p.ChangeDesc))
+    copy(newChangeDesc, p.ChangeDesc)
+  }
+  log.Printf("\n\nclone: %t\n\n", newChangeDesc == nil)
 
   return &Person{
     struct{}{},
@@ -107,5 +115,7 @@ func (p *Person) Clone() *Person {
 
 
 func (p *Person) PromoteChanges() {
+  log.Printf("\n\npromote: %t", p.ChangeDesc == nil)
   p.ChangeDesc = p.Addresses.PromoteChanges(p.ChangeDesc)
+  log.Printf("promote: %t\n\n", p.ChangeDesc == nil)
 }

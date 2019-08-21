@@ -1,7 +1,6 @@
 package persons_test
 
 import (
-  "database/sql"
   "encoding/json"
   "reflect"
   "strconv"
@@ -10,7 +9,7 @@ import (
   "time"
 
   . "github.com/Liquid-Labs/lc-entities-model/go/entities"
-  "github.com/Liquid-Labs/lc-locations-model/go/locations"
+  . "github.com/Liquid-Labs/lc-locations-model/go/locations"
   "github.com/Liquid-Labs/lc-users-model/go/users"
   "github.com/stretchr/testify/assert"
   "github.com/stretchr/testify/require"
@@ -31,22 +30,12 @@ func init() {
     `backup@test.org`,
     `555-555-9998`,
     `http://foo.com/avatar`,
-    locations.Addresses{
-      &locations.Address{
-        locations.Location{
-          1,
-          `a`,
-          `b`,
-          `c`,
-          `d`,
-          `e`,
-          sql.NullFloat64{2.0, true},
-          sql.NullFloat64{3.0, true},
-          []string{`f`, `g`},
-        },
-        1,
-        `label a`,
-      }})
+    Addresses{
+      NewAddress(
+        `name`, `desc`, EID(`abc`), true,
+        `a`, `b`, `c`, `d`, `e`,
+        EID(`abc`), `label a`,
+      )})
 
   trivialPerson.ID = `abc`
   trivialPerson.OwnerID = `abc`
@@ -68,22 +57,12 @@ func TestPersonClone(t *testing.T) {
   clone.BackupEmail = `blah@test.org`
   clone.BackupPhone = `555-555-9996`
   clone.AvatarURL =`http://bar.com/image`
-  clone.Addresses = locations.Addresses{
-    &locations.Address{
-      locations.Location{
-        2,
-        `z`,
-        `y`,
-        `x`,
-        `w`,
-        `u`,
-        sql.NullFloat64{4.0, true},
-        sql.NullFloat64{5.0, true},
-        []string{`i`},
-      },
-      2,
-      `label b`,
-    },
+  clone.Addresses = Addresses{
+    NewAddress(
+      `name`, `desc`, EID(`abc`), true,
+      `a1`, `a2`, `x`, `w`, `u`,
+      EID(`xyz`), `label b`,
+    ),
   }
   clone.ChangeDesc = []string{`j`}
 
@@ -91,13 +70,16 @@ func TestPersonClone(t *testing.T) {
   aoReflection := reflect.ValueOf(trivialPerson.Addresses[0]).Elem()
   acReflection := reflect.ValueOf(clone.Addresses[0]).Elem()
   for i := 0; i < aoReflection.NumField(); i++ {
-    assert.NotEqualf(
-      t,
-      aoReflection.Field(i).Interface(),
-      acReflection.Field(i).Interface(),
-      `Fields '%s' unexpectedly match.`,
-      aoReflection.Type().Field(i),
-    )
+    name := aoReflection.Type().FieldByIndex([]int{i}).Name
+    if name[:1] == strings.ToUpper(name[:1]) {
+      assert.NotEqualf(
+        t,
+        aoReflection.Field(i).Interface(),
+        acReflection.Field(i).Interface(),
+        `Fields '%s' unexpectedly match.`,
+        aoReflection.Type().Field(i),
+      )
+    }
   }
 
   oReflection := reflect.ValueOf(trivialPerson).Elem()
