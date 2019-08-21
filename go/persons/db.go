@@ -1,6 +1,8 @@
 package persons
 
 import (
+  "context"
+  "log"
   "github.com/go-pg/pg/orm"
 
   "github.com/Liquid-Labs/lc-authentication-api/go/auth"
@@ -21,25 +23,37 @@ func requireAuthentication(db orm.DB) (string, Terror) {
   }
 }
 
-func (p *Person) CreatePersonSelf(db orm.DB) Terror {
-  if authID, err := requireAuthentication(db); err != nil {
+func (p *Person) CreatePersonSelf(ctx context.Context) Terror {
+  im := ConnectItemManagerWithContext(ctx)
+  if authID, err := requireAuthentication(im.GetDB()); err != nil {
     return err
   } else {
-    q := db.Model(p).Where(`person.auth_id=?`, authID)
-    if exists, err := q.Exists(); err != nil {
-      return ServerError(`There was a problem verifying person existence.`, err)
-    } else if exists {
-      return BadRequestError(`Self already exists.`)
+    log.Printf("\n\nabout to start txn")
+    if tx, err := im.Begin(); err != nil {
+      return ServerError(`There was a problem creating person record.`, err)
     } else {
-      im := ConnectItemManager()
-      if err := im.CreateRaw(p); err != nil {
+      q := tx.Model(p).Where(`person.auth_id=?`, authID)
+      if exists, err := q.Exists(); err != nil {
+        defer im.Rollback() // TODO: check and log error
+        return ServerError(`There was a problem verifying person existence.`, err)
+      } else if exists {
+        defer im.Rollback() // TODO: check and log error
+        return BadRequestError(`Self already exists.`)
+      } else if err = im.CreateRaw(p); err != nil {
+        defer im.Rollback() // TODO: check and log error
         return ServerError(`Problem creating person record.`, err)
       } else {
         for _, address := range *p.GetAddresses() {
+          address.OwnerID = p.GetID()
           address.EntityID = p.GetID()
         }
-        im.CreateRaw(p.GetAddresses())
-        return nil
+        if err = im.CreateRaw(p.GetAddresses()); err != nil {
+          defer im.Rollback()
+          return ServerError(`There was a problem creating the person record.`, err)
+        } else {
+          defer im.Commit()
+          return nil
+        }
       }
     }
   }
