@@ -2,7 +2,6 @@ package persons
 
 import (
   "context"
-  "log"
   "github.com/go-pg/pg/orm"
 
   "github.com/Liquid-Labs/lc-authentication-api/go/auth"
@@ -28,7 +27,6 @@ func (p *Person) CreatePersonSelf(ctx context.Context) Terror {
   if authID, err := requireAuthentication(im.GetDB()); err != nil {
     return err
   } else {
-    log.Printf("\n\nabout to start txn")
     if tx, err := im.Begin(); err != nil {
       return ServerError(`There was a problem creating person record.`, err)
     } else {
