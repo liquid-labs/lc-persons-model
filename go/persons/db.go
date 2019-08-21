@@ -14,7 +14,7 @@ func requireAuthentication(db orm.DB) (string, Terror) {
   ctx := db.Context()
   if ctx == nil { return ``, ServerError(`Required context not found.`, nil) }
 
-  if authOracle := auth.GetAuthOracleFromContext(ctx); authOracle != nil {
+  if authOracle := auth.GetAuthOracleFromContext(ctx); authOracle == nil {
     return ``, ForbiddenError("Request is not authorized.")
   } else {
     return authOracle.GetAuthID(), nil

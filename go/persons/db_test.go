@@ -9,8 +9,10 @@ import (
   "github.com/stretchr/testify/assert"
   "github.com/stretchr/testify/require"
   "github.com/stretchr/testify/suite"
+  . "github.com/golang/mock/gomock"
 
   "github.com/Liquid-Labs/lc-authentication-api/go/auth"
+  authmock "github.com/Liquid-Labs/lc-authentication-api/go/mock"
   . "github.com/Liquid-Labs/lc-entities-model/go/entities"
   . "github.com/Liquid-Labs/lc-locations-model/go/locations"
   "github.com/Liquid-Labs/lc-rdb-service/go/rdb"
@@ -29,13 +31,19 @@ type PersonIntegrationSuite struct {
   suite.Suite
   Ctx    context.Context
   AuthID string
+  Ctrler *Controller
 }
 func (s *PersonIntegrationSuite) SetupTest() {
   s.AuthID = strkit.RandString(strkit.LettersAndNumbers, 12)
-  ctx := context.Background()
-  authenticator := &auth.Authenticator{}
-  authenticator.SetAznID(s.AuthID)
-  s.Ctx = context.WithValue(ctx, auth.AuthenticatorKey, authenticator)
+
+  s.Ctrler = NewController(s.T())
+  authOracle := authmock.NewMockAuthOracle(s.Ctrler)
+  authOracle.EXPECT().GetAuthID().Return(s.AuthID).AnyTimes()
+
+  s.Ctx = auth.SetAuthOracleOnContext(authOracle, context.Background())
+}
+func (s *PersonIntegrationSuite) TearDownTest() {
+  s.Ctrler.Finish()
 }
 func TestPersonIntegrationSuite(t *testing.T) {
   if os.Getenv(`SKIP_INTEGRATION`) == `true` {
@@ -44,7 +52,7 @@ func TestPersonIntegrationSuite(t *testing.T) {
     suite.Run(t, new(PersonIntegrationSuite))
   }
 }
-/*
+
 func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   p := persons.NewPerson(
     NewUser(`users`, `Bob Woodward`, `a dude`, s.AuthID, `555-55-5555`, `SSN`, true),
@@ -66,7 +74,7 @@ func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   pCopy, err := persons.RetrievePersonSelf(rdb.ConnectWithContext(s.Ctx))
   require.NoError(s.T(), err)
   assert.Equal(s.T(), p, pCopy)
-}*/
+}
 
 func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
   as := make(Addresses, 0)
