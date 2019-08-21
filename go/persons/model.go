@@ -11,6 +11,8 @@ import (
 
 var phoneOutFormatter *regexp.Regexp = regexp.MustCompile(`^(\d{3})(\d{3})(\d{4})$`)
 
+const PersonsResourceName = `persons`
+
 // On summary, we don't include address. Note leaving it empty and using
 // 'omitempty' on the Person struct won't work because then Persons without
 // an address will appear 'incomplete' in the front-end model and never resolve.
@@ -29,7 +31,12 @@ type Person struct {
 }
 
 func NewPerson(
-    u *User,
+    name string,
+    description string,
+    authID string,
+    legalID string,
+    legalIDType string,
+    active bool,
     givenName string,
     familyName string,
     email string,
@@ -40,7 +47,7 @@ func NewPerson(
     addresses Addresses) *Person {
   return &Person{
     struct{}{},
-    *u,
+    *NewUser(PersonsResourceName, name, description, authID, legalID, legalIDType, active),
     givenName,
     familyName,
     email,
