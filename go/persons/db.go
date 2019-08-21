@@ -62,7 +62,7 @@ func RetrievePersonSelf(db orm.DB) (*Person, Terror) {
   }
 }
 
-func (p *Person) UpdatePersonSelf(db orm.DB) Terror {
+func (p *Person) UpdateSelf(db orm.DB) Terror {
   if authID, err := checkAuthentication(db); err != nil {
     return err
   } else {
