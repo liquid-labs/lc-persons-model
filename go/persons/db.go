@@ -32,6 +32,9 @@ func (p *Person) CreatePersonSelf(db orm.DB) Terror {
       if err := im.CreateRaw(p); err != nil {
         return ServerError(`Problem creating person record.`, err)
       } else {
+        for _, address := range *p.GetAddresses() {
+          address.EntityID = p.GetID()
+        }
         im.CreateRaw(p.GetAddresses())
         return nil
       }
@@ -39,7 +42,7 @@ func (p *Person) CreatePersonSelf(db orm.DB) Terror {
   }
 }
 
-func RetrievePersonSelf(id EID, db orm.DB) (*Person, Terror) {
+func RetrievePersonSelf(db orm.DB) (*Person, Terror) {
   if authID, err := checkAuthentication(db); err != nil {
     return nil, err
   } else {

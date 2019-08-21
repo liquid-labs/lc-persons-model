@@ -25,3 +25,5 @@ replace github.com/Liquid-Labs/terror => ../terror
 replace github.com/Liquid-Labs/go-rest => ../go-rest
 
 replace github.com/Liquid-Labs/lc-rdb-service => ../lc-rdb-service
+
+replace github.com/Liquid-Labs/catalyst-core-api => ../catalyst-core-api

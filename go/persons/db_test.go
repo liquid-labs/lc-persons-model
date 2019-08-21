@@ -11,7 +11,7 @@ import (
   "github.com/stretchr/testify/suite"
 
   "github.com/Liquid-Labs/lc-authentication-api/go/auth"
-  // . "github.com/Liquid-Labs/lc-entities-model/go/entities"
+  . "github.com/Liquid-Labs/lc-entities-model/go/entities"
   . "github.com/Liquid-Labs/lc-locations-model/go/locations"
   "github.com/Liquid-Labs/lc-rdb-service/go/rdb"
   "github.com/Liquid-Labs/strkit/go/strkit"
@@ -44,7 +44,7 @@ func TestPersonIntegrationSuite(t *testing.T) {
     suite.Run(t, new(PersonIntegrationSuite))
   }
 }
-
+/*
 func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   p := persons.NewPerson(
     NewUser(`users`, `Bob Woodward`, `a dude`, s.AuthID, `555-55-5555`, `SSN`, true),
@@ -63,11 +63,11 @@ func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   assert.Equal(s.T(), `Robert`, p.GetGivenName())
   assert.Equal(s.T(), 0, len(*p.GetAddresses()))
 
-  pCopy, err := persons.RetrievePersonSelf(p.GetID(), rdb.ConnectWithContext(s.Ctx))
+  pCopy, err := persons.RetrievePersonSelf(rdb.ConnectWithContext(s.Ctx))
   require.NoError(s.T(), err)
   assert.Equal(s.T(), p, pCopy)
-}
-/*
+}*/
+
 func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
   as := make(Addresses, 0)
   as = append(as,
@@ -106,7 +106,7 @@ func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
   a2 := (*p.GetAddresses())[1]
   assert.Equal(s.T(), `#B`, a2.GetAddress2())
 
-  pCopy, err := persons.RetrievePersonSelf(p.GetID(), rdb.ConnectWithContext(s.Ctx))
+  pCopy, err := persons.RetrievePersonSelf(rdb.ConnectWithContext(s.Ctx))
   require.NoError(s.T(), err)
   assert.Equal(s.T(), p, pCopy)
-}*/
+}
