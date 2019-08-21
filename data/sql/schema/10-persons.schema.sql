@@ -2,9 +2,9 @@ CREATE TABLE persons (
   id           UUID,
   given_name   VARCHAR(128),
   family_name  VARCHAR(128),
+  email        VARCHAR(255) NOT NULL,
   -- we allow extra space for the pre-formatted number
   phone        VARCHAR(14),
-  email        VARCHAR(255) NOT NULL,
   backup_email VARCHAR(255),
   backup_phone VARCHAR(14),
   avatar_url   VARCHAR,
