@@ -10,16 +10,19 @@ import (
   . "github.com/Liquid-Labs/lc-users-model/go/users"
 )
 
-func checkAuthentication(db orm.DB) (string, Terror) {
+func requireAuthentication(db orm.DB) (string, Terror) {
   ctx := db.Context()
-  if ctx == nil { return ``, ServerError(`Must set context on db.`, nil) }
-  _, authID, err := auth.CheckAuthentication(ctx)
+  if ctx == nil { return ``, ServerError(`Required context not found.`, nil) }
 
-  return authID, err
+  if authOracle := auth.GetAuthOracleFromContext(ctx); authOracle != nil {
+    return ``, ForbiddenError("Request is not authorized.")
+  } else {
+    return authOracle.GetAuthID(), nil
+  }
 }
 
 func (p *Person) CreatePersonSelf(db orm.DB) Terror {
-  if authID, err := checkAuthentication(db); err != nil {
+  if authID, err := requireAuthentication(db); err != nil {
     return err
   } else {
     q := db.Model(p).Where(`person.auth_id=?`, authID)
@@ -43,7 +46,7 @@ func (p *Person) CreatePersonSelf(db orm.DB) Terror {
 }
 
 func RetrievePersonSelf(db orm.DB) (*Person, Terror) {
-  if authID, err := checkAuthentication(db); err != nil {
+  if authID, err := requireAuthentication(db); err != nil {
     return nil, err
   } else {
     p := &Person{}
@@ -63,7 +66,7 @@ func RetrievePersonSelf(db orm.DB) (*Person, Terror) {
 }
 
 func (p *Person) UpdateSelf(db orm.DB) Terror {
-  if authID, err := checkAuthentication(db); err != nil {
+  if authID, err := requireAuthentication(db); err != nil {
     return err
   } else {
     qs := p.UpdateQueries(db)
