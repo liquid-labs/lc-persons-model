@@ -5,6 +5,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.es.js",
   "files": [
+    ".catalyst",
     "README.md",
     "LICENSE.txt",
     "dist/",
