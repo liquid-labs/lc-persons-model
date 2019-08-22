@@ -41,13 +41,13 @@
     ]
   },
   "devDependencies": {
-    "@liquid-labs/catalyst-scripts": "file:.yalc/@liquid-labs/catalyst-scripts",
-    "@liquid-labs/lc-entities-model": "file:.yalc/@liquid-labs/lc-entities-model",
+    "@liquid-labs/catalyst-scripts": "^1.0.0-alpha.24",
     "@liquid-labs/lc-rdb-service": "^1.0.0-alpha.0",
     "@liquid-labs/liquid-dev-cloudsql": "^1.0.0-prototype.0"
   },
   "dependencies": {
-    "@liquid-labs/lc-locations-model": "file:.yalc/@liquid-labs/lc-locations-model",
-    "@liquid-labs/lc-users-model": "file:.yalc/@liquid-labs/lc-users-model"
+    "@liquid-labs/lc-entities-model": "^1.0.0-alpha.1",
+    "@liquid-labs/lc-locations-model": "^1.0.0-alpha.2",
+    "@liquid-labs/lc-users-model": "^1.0.0-alpha.2"
   }
 }
