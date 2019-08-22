@@ -1,6 +1,6 @@
 {
   "name": "@liquid-labs/lc-persons-model",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0-alpha.4",
   "description": "A standard persons model in Go and JS for Liquid Code + compatible projects.",
   "main": "./dist/index.js",
   "module": "./dist/index.es.js",
