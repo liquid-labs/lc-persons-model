@@ -10,7 +10,6 @@ import (
 
   . "github.com/Liquid-Labs/lc-entities-model/go/entities"
   . "github.com/Liquid-Labs/lc-locations-model/go/locations"
-  "github.com/Liquid-Labs/lc-users-model/go/users"
   "github.com/stretchr/testify/assert"
   "github.com/stretchr/testify/require"
 
@@ -22,7 +21,9 @@ var trivialPerson *Person
 
 func init() {
   trivialPerson = NewPerson(
-    users.NewUser(`users`, `name`, `name is a user`, `xzc098`, `555-55-555`, `SSN`, true),
+    /* user stuff */
+    `name`, `name is a user`, `xzc098`, `555-55-555`, `SSN`, true,
+    /* person stuff */
     `GivenName`,
     `FamilyName`,
     `foo@test.com`,

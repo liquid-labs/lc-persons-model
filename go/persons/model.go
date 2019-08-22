@@ -68,8 +68,6 @@ func (p *Person) FormatOut() *Person {
 
 func (p *Person) IsConcrete() bool { return true }
 
-func (p *Person) GetResourceName() ResourceName { return ResourceName(`persons`) }
-
 func (p *Person) GetEntity() *Entity { return p.User.GetEntity() }
 
 func (p *Person) GetGivenName() string { return p.GivenName }

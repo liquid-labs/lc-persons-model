@@ -22,36 +22,52 @@ func requireAuthentication(db orm.DB) (string, Terror) {
   }
 }
 
-func (p *Person) CreatePersonSelf(ctx context.Context) Terror {
+func (p *Person) CreateSelf(ctx context.Context) Terror {
   im := ConnectItemManagerWithContext(ctx)
   if authID, err := requireAuthentication(im.GetDB()); err != nil {
     return err
+  } else if tx, err := im.Begin(); err != nil {
+    return ServerError(`There was a problem creating person record.`, err)
   } else {
-    if tx, err := im.Begin(); err != nil {
-      return ServerError(`There was a problem creating person record.`, err)
+    q := tx.Model(p).Where(`person.auth_id=?`, authID)
+    if exists, err := q.Exists(); err != nil {
+      defer im.Rollback() // TODO: check and log error
+      return ServerError(`There was a problem verifying person existence.`, err)
+    } else if exists {
+      defer im.Rollback() // TODO: check and log error
+      return BadRequestError(`Self already exists.`)
     } else {
-      q := tx.Model(p).Where(`person.auth_id=?`, authID)
-      if exists, err := q.Exists(); err != nil {
-        defer im.Rollback() // TODO: check and log error
-        return ServerError(`There was a problem verifying person existence.`, err)
-      } else if exists {
-        defer im.Rollback() // TODO: check and log error
-        return BadRequestError(`Self already exists.`)
-      } else if err = im.CreateRaw(p); err != nil {
-        defer im.Rollback() // TODO: check and log error
-        return ServerError(`Problem creating person record.`, err)
+      return p.createShared(ctx, im)
+    }
+  }
+}
+
+func (p *Person) CreateRaw(ctx context.Context) Terror {
+  return p.createShared(ctx, ConnectItemManagerWithContext(ctx))
+}
+
+func (p *Person) createShared(ctx context.Context, im *ItemManager) Terror {
+  if p.GetResourceName() == `` { // this can happen with otherwise valid JSON constructs
+    p.ResourceName = `persons`
+  }
+  if _, err := im.BeginIfNecessary(); err != nil {
+    return ServerError(`There was a problem creating person record.`, err)
+  } else {
+    if err = im.CreateRaw(p); err != nil {
+      defer im.Rollback() // TODO: check and log error
+      return ServerError(`Problem creating person record.`, err)
+    } else {
+      for _, address := range *p.GetAddresses() {
+        address.ResourceName = `locations`
+        address.OwnerID = p.GetID()
+        address.EntityID = p.GetID()
+      }
+      if err = im.CreateRaw(p.GetAddresses()); err != nil {
+        defer im.Rollback()
+        return ServerError(`There was a problem creating the person record.`, err)
       } else {
-        for _, address := range *p.GetAddresses() {
-          address.OwnerID = p.GetID()
-          address.EntityID = p.GetID()
-        }
-        if err = im.CreateRaw(p.GetAddresses()); err != nil {
-          defer im.Rollback()
-          return ServerError(`There was a problem creating the person record.`, err)
-        } else {
-          defer im.Commit()
-          return nil
-        }
+        defer im.Commit()
+        return nil
       }
     }
   }
@@ -69,6 +85,7 @@ func RetrievePersonSelf(db orm.DB) (*Person, Terror) {
       p.Addresses = make(Addresses, 0)
       p.Addresses.RetrieveByIDRaw(p.GetID(), db)
       // TODO: this is not functionally necessary, but we need exact matches for the tests.
+      // TODO: make this part of FormatOut (?)
       if p.Addresses != nil && len(p.Addresses) == 0 {
         p.Addresses = Addresses(nil)
       }
@@ -115,7 +132,7 @@ func init() {
   updateExcludes = append(updateExcludes, "id")
 }
 
-func (p *Person) UpdateQuerios(db orm.DB) []*orm.Query {
+func (p *Person) UpdateQueries(db orm.DB) []*orm.Query {
   q := db.Model(p).
     ExcludeColumn(updateExcludes...).
     Where(`"person".id=?id`)

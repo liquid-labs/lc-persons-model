@@ -18,7 +18,6 @@ import (
   "github.com/Liquid-Labs/lc-rdb-service/go/rdb"
   "github.com/Liquid-Labs/strkit/go/strkit"
   "github.com/Liquid-Labs/terror/go/terror"
-  . "github.com/Liquid-Labs/lc-users-model/go/users"
   /* pkg2test */ "github.com/Liquid-Labs/lc-persons-model/go/persons"
 )
 
@@ -55,7 +54,8 @@ func TestPersonIntegrationSuite(t *testing.T) {
 
 func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
   p := persons.NewPerson(
-    NewUser(`users`, `Bob Woodward`, `a dude`, s.AuthID, `555-55-5555`, `SSN`, true),
+     /* user stuff */
+     `Bob Woodward`, `a dude`, s.AuthID, `555-55-5555`, `SSN`, true,
     `Robert`,
     `Woodward`,
     `foo@bar.com`,
@@ -65,7 +65,7 @@ func (s *PersonIntegrationSuite) TestPersonCreateNoAddresses() {
     `https://avatars.com/bob`,
     (Addresses)(nil))
 
-  require.NoError(s.T(), p.CreatePersonSelf(rdb.ConnectWithContext(s.Ctx)))
+  require.NoError(s.T(), p.CreateSelf(s.Ctx))
   assert.Equal(s.T(), `Bob Woodward`, p.GetName())
   assert.Equal(s.T(), s.AuthID, p.GetAuthID())
   assert.Equal(s.T(), `Robert`, p.GetGivenName())
@@ -90,7 +90,7 @@ func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
       EID(``), `Vacation`,
     ))
   p := persons.NewPerson(
-    NewUser(`users`, `Address Woman`, `a lady`, s.AuthID, `555-44-5555`, `SSN`, true),
+    `Address Woman`, `a lady`, s.AuthID, `555-44-5555`, `SSN`, true,
     `Address`,
     `Woman`,
     `blah@bar.com`,
@@ -100,7 +100,7 @@ func (s *PersonIntegrationSuite) TestPersonCreateWithAddresses() {
     `https://avatars.com/address`,
     as)
 
-  require.NoError(s.T(), p.CreatePersonSelf(rdb.ConnectWithContext(s.Ctx)))
+  require.NoError(s.T(), p.CreateSelf(s.Ctx))
   assert.Equal(s.T(), `Address Woman`, p.GetName())
   assert.Equal(s.T(), s.AuthID, p.GetAuthID())
   assert.Equal(s.T(), `Address`, p.GetGivenName())
